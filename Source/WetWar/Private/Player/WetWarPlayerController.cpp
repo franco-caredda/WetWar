@@ -9,9 +9,23 @@
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
+#include "Character/WetWarCharacter.h"
 
 AWetWarPlayerController::AWetWarPlayerController()
 {
+}
+
+bool AWetWarPlayerController::DeprojectCenterToWorld(FVector& WorldLocation, FVector& WorldDirection) const
+{
+	int ViewportWidth, ViewportHeight;
+	GetViewportSize(ViewportWidth, ViewportHeight);
+
+	return DeprojectScreenPositionToWorld(
+		ViewportWidth * 0.5f,
+		ViewportHeight * 0.5f,
+		WorldLocation,
+		WorldDirection
+	);
 }
 
 void AWetWarPlayerController::BeginPlay()
@@ -39,7 +53,7 @@ void AWetWarPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this,
 		&AWetWarPlayerController::OnLookActionTriggered);
 
-	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this,
+	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this,
 		&AWetWarPlayerController::OnFireActionStarted);
 	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this,
 		&AWetWarPlayerController::OnFireActionCompleted);
@@ -58,7 +72,7 @@ void AWetWarPlayerController::OnMoveActionTriggered(const FInputActionValue& Val
 	const FVector ForwardVector = RotationMatrix.GetUnitAxis(EAxis::X);
 	const FVector RightVector = RotationMatrix.GetUnitAxis(EAxis::Y);
 
-	if (ACharacter* aCharacter = GetPawn<ACharacter>())
+	if (AWetWarCharacter* aCharacter = GetPawn<AWetWarCharacter>())
 	{
 		aCharacter->AddMovementInput(ForwardVector, Direction.Y);
 		aCharacter->AddMovementInput(RightVector, Direction.X);
@@ -75,10 +89,18 @@ void AWetWarPlayerController::OnLookActionTriggered(const FInputActionValue& Val
 
 void AWetWarPlayerController::OnFireActionStarted(const FInputActionValue& Value)
 {
+	if (AWetWarCharacter* aCharacter = GetPawn<AWetWarCharacter>())
+	{
+		aCharacter->StartFire();
+	}
 }
 
 void AWetWarPlayerController::OnFireActionCompleted(const FInputActionValue& Value)
 {
+	if (AWetWarCharacter* aCharacter = GetPawn<AWetWarCharacter>())
+	{
+		aCharacter->StopFire();
+	}
 }
 
 void AWetWarPlayerController::OnInteractActionCompleted(const FInputActionValue& Value)

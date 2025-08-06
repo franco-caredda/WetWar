@@ -37,6 +37,22 @@ void AWeaponBase::BeginPlay()
 	}
 }
 
+void AWeaponBase::HandleReduceWaterVolume()
+{
+	CurrentWaterVolume--;
+	OnWaterVolumeChanged.Broadcast(CurrentWaterVolume, MaxWaterVolume);
+}
+
+bool AWeaponBase::Trace(const FVector& StartLocation, const FVector& EndLocation, FHitResult& OutResult) const
+{
+	return GetWorld()->LineTraceSingleByChannel(
+		OutResult,
+		StartLocation,
+		EndLocation,
+		ECollisionChannel::ECC_Visibility
+	);
+}
+
 void AWeaponBase::OnRep_CurrentWaterVolume() const
 {
 	OnWaterVolumeChanged.Broadcast(CurrentWaterVolume, MaxWaterVolume);

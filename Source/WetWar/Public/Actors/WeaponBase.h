@@ -6,8 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "WeaponBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWaterVolumeChanged, int, CurrentVolume, int, MaxVolume);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWaterVolumeChanged, int, int);
 
+/**
+ * The base class for weapons that doesn't contain blueprints-exposed functions.
+ * The communication between characters and weapons should be implemented through UWeaponComponent.
+ */
 UCLASS(Abstract)
 class WETWAR_API AWeaponBase : public AActor
 {
@@ -15,15 +19,22 @@ class WETWAR_API AWeaponBase : public AActor
 	
 public:	
 	AWeaponBase();
-
+	
+	virtual void Fire(const FVector& WorldLocation, const FVector& WorldDirection) PURE_VIRTUAL(AWeaponBase::Fire);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	FORCEINLINE bool CanFire() const { return CurrentWaterVolume > 0; }
+	FORCEINLINE FVector GetMuzzleLocation() const { return MuzzleLocation->GetComponentLocation(); }
+	FORCEINLINE float GetFireRate() const { return FireRate; }
 protected:
 	virtual void BeginPlay() override;
+
+	void HandleReduceWaterVolume();
+	bool Trace(const FVector& StartLocation, const FVector& EndLocation, FHitResult& OutResult) const;
 private:
 	UFUNCTION()
 	void OnRep_CurrentWaterVolume() const;
 public:
-	UPROPERTY(BlueprintAssignable)
 	FOnWaterVolumeChanged OnWaterVolumeChanged;
 protected:
 	UPROPERTY(EditDefaultsOnly)
@@ -40,9 +51,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	int MaxWaterVolume;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
-	float Distance;
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentWaterVolume)
 	int CurrentWaterVolume;

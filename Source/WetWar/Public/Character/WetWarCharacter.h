@@ -11,6 +11,15 @@ class AWeaponBase;
 class UCameraComponent;
 class UWeaponComponent;
 
+UENUM(BlueprintType)
+enum class ECharacterMode : uint8
+{
+	FirstPerson = 0,
+	Spectator   = 1,
+
+	Max
+};
+
 UCLASS()
 class WETWAR_API AWetWarCharacter : public ACharacter
 {
@@ -18,11 +27,23 @@ class WETWAR_API AWetWarCharacter : public ACharacter
 
 public:
 	AWetWarCharacter();
+
+	UFUNCTION(BlueprintCallable)
+	void StartFire();
+
+	UFUNCTION(BlueprintCallable)
+	void StopFire();
+	
+	UFUNCTION(BlueprintPure)
+	ECharacterMode GetCharacterMode() const;
 protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void OnWeaponSet(AWeaponBase* Weapon);
+
+	UFUNCTION()
+	void OnFireTick();
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> CameraComponent;
@@ -38,4 +59,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachments")
 	FName SpectatorViewGripPoint;
+private:
+	FTimerHandle FireTimer;
 };

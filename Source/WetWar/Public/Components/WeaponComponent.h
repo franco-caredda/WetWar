@@ -32,9 +32,17 @@ public:
 	void Reload();
 	
 	UFUNCTION(BlueprintCallable)
-	void Fire();
+	void Fire(const FVector& WorldLocation, const FVector& WorldDirection);
+
+	UFUNCTION(BlueprintPure)
+	float GetFireRate() const;
 protected:
 	virtual void BeginPlay() override;
+
+	void PerformFire(const FVector& WorldLocation, const FVector& WorldDirection) const;
+
+	UFUNCTION(Server, Reliable)
+	void ServerPerformFire(const FVector& WorldLocation, const FVector& WorldDirection);
 private:
 	UFUNCTION()
 	void OnRep_CurrentWeapon() const;
@@ -57,3 +65,4 @@ private:
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentWeapon)
 	TObjectPtr<AWeaponBase> CurrentWeapon;
 };
+

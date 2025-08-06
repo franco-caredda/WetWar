@@ -21,6 +21,8 @@ class WETWAR_API AWetWarPlayerController : public APlayerController
 public:
 	AWetWarPlayerController();
 
+	UFUNCTION(BlueprintCallable)
+	bool DeprojectCenterToWorld(FVector& WorldLocation, FVector& WorldDirection) const;
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

@@ -3,6 +3,7 @@
 
 #include "Components/WeaponComponent.h"
 
+#include "Actors/HitScanWeapon.h"
 #include "Actors/WeaponBase.h"
 #include "Net/UnrealNetwork.h"
 
@@ -44,18 +45,40 @@ void UWeaponComponent::Reload()
 {
 }
 
-void UWeaponComponent::Fire()
+void UWeaponComponent::Fire(const FVector& WorldLocation, const FVector& WorldDirection)
 {
+	if (Cast<AHitScanWeapon>(CurrentWeapon) != nullptr &&
+		GetOwnerRole() != ROLE_Authority)
+	{
+		PerformFire(WorldLocation, WorldDirection);
+	}
+
+	ServerPerformFire(WorldLocation, WorldDirection);
+}
+
+float UWeaponComponent::GetFireRate() const
+{
+	if (CurrentWeapon)
+	{
+		return CurrentWeapon->GetFireRate();
+	}
+
+	return 0.0f;
+}
+
+void UWeaponComponent::PerformFire(const FVector& WorldLocation, const FVector& WorldDirection) const
+{
+	CurrentWeapon->Fire(WorldLocation, WorldDirection);
+}
+
+void UWeaponComponent::ServerPerformFire_Implementation(const FVector& WorldLocation, const FVector& WorldDirection)
+{
+	PerformFire(WorldLocation, WorldDirection);
 }
 
 void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (GetNetMode() == NM_ListenServer)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Listening...");
-	}
 	
 	if (GetOwnerRole() == ROLE_Authority)
 	{
@@ -66,6 +89,9 @@ void UWeaponComponent::BeginPlay()
 
 		SecondaryWeapon = GetWorld()->SpawnActor<AWeaponBase>(SecondaryWeaponClass);
 		SecondaryWeapon->SetActorHiddenInGame(true);
+
+		PrimaryWeapon->SetOwner(GetOwner());
+		SecondaryWeapon->SetOwner(GetOwner());
 	}
 }
 
