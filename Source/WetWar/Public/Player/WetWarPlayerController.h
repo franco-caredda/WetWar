@@ -41,6 +41,12 @@ protected:
 
 	UFUNCTION()
 	void OnInteractActionTriggered(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void OnJumpActionStarted(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void OnJumpActionCompleted(const FInputActionValue& Value);
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
@@ -56,4 +62,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="Input|Actions")
 	TObjectPtr<UInputAction> InteractAction;
+
+	UPROPERTY(EditDefaultsOnly, Category="Input|Actions")
+	TObjectPtr<UInputAction> JumpAction;
 };

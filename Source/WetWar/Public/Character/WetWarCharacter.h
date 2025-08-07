@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "WetWarCharacter.generated.h"
 
+class UWetnessComponent;
 class IInteractable;
 class AWeaponBase;
 
@@ -30,6 +31,9 @@ class WETWAR_API AWetWarCharacter : public ACharacter
 public:
 	AWetWarCharacter();
 
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator, AActor* DamageCauser) override;
+	
 	UFUNCTION(BlueprintCallable)
 	void StartFire();
 
@@ -54,6 +58,9 @@ protected:
 	UFUNCTION()
 	void OnInteractionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION()
+	void OnWetnessLevelChanged(float WetnessLevel, float MaxWetnessLevel);
 	
 	UFUNCTION()
 	void OnFireTick();
@@ -69,6 +76,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UWeaponComponent> WeaponComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UWetnessComponent> WetnessComponent;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachments")
 	FName FirstPersonViewGripPoint;

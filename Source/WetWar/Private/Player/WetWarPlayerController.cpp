@@ -60,6 +60,11 @@ void AWetWarPlayerController::SetupInputComponent()
 	
 	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this,
 		&AWetWarPlayerController::OnInteractActionTriggered);
+
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this,
+		&AWetWarPlayerController::OnJumpActionStarted);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
+		&AWetWarPlayerController::OnJumpActionCompleted);
 }
 
 void AWetWarPlayerController::OnMoveActionTriggered(const FInputActionValue& Value)
@@ -108,5 +113,21 @@ void AWetWarPlayerController::OnInteractActionTriggered(const FInputActionValue&
 	if (AWetWarCharacter* aCharacter = GetPawn<AWetWarCharacter>())
 	{
 		aCharacter->ServerInteract();
+	}
+}
+
+void AWetWarPlayerController::OnJumpActionStarted(const FInputActionValue& Value)
+{
+	if (AWetWarCharacter* aCharacter = GetPawn<AWetWarCharacter>())
+	{
+		aCharacter->Jump();
+	}
+}
+
+void AWetWarPlayerController::OnJumpActionCompleted(const FInputActionValue& Value)
+{
+	if (AWetWarCharacter* aCharacter = GetPawn<AWetWarCharacter>())
+	{
+		aCharacter->StopJumping();
 	}
 }

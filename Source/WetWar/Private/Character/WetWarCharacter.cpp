@@ -7,6 +7,7 @@
 
 #include "Components/SphereComponent.h"
 #include "Components/WeaponComponent.h"
+#include "Components/WetnessComponent.h"
 
 #include "Interfaces/Interactable.h"
 
@@ -40,6 +41,19 @@ AWetWarCharacter::AWetWarCharacter()
 	{
 		WeaponComponent->SetIsReplicated(true);
 	}
+
+	WetnessComponent = CreateDefaultSubobject<UWetnessComponent>("WetnessComponent");
+	if (WetnessComponent)
+	{
+		WetnessComponent->SetIsReplicated(true);
+	}
+}
+
+float AWetWarCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	WetnessComponent->TakeDamage(Damage);
+	return Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void AWetWarCharacter::StartFire()
@@ -89,6 +103,7 @@ void AWetWarCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	WeaponComponent->OnWeaponSet.AddDynamic(this, &AWetWarCharacter::OnWeaponSet);
+	WetnessComponent->OnWetnessLevelChanged.AddDynamic(this, &AWetWarCharacter::OnWetnessLevelChanged);
 
 	if (GetLocalRole() == ROLE_Authority)
 	{
@@ -108,12 +123,6 @@ void AWetWarCharacter::OnWeaponSet(AWeaponBase* Weapon)
 	{
 		Weapon->AttachToComponent(FirstPersonArms,
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale, FirstPersonViewGripPoint);
-
-		Weapon->OnWaterVolumeChanged.AddLambda([this](int CurrentVolume, int MaxVolume)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0.25f, FColor::Red,
-				FString::Printf(TEXT("Current water volume: %d"), CurrentVolume));
-		});
 		
 		return;
 	}
@@ -135,6 +144,12 @@ void AWetWarCharacter::OnInteractionEndOverlap(UPrimitiveComponent* OverlappedCo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	InteractActor = nullptr;
+}
+
+void AWetWarCharacter::OnWetnessLevelChanged(float WetnessLevel, float MaxWetnessLevel)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red,
+		FString::Printf(TEXT("Wetness level: %f"), WetnessLevel));
 }
 
 void AWetWarCharacter::ServerInteract_Implementation()

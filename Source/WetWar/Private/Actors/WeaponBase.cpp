@@ -51,11 +51,14 @@ void AWeaponBase::HandleReduceWaterVolume()
 
 bool AWeaponBase::Trace(const FVector& StartLocation, const FVector& EndLocation, FHitResult& OutResult) const
 {
+	FCollisionQueryParams TraceParams = FCollisionQueryParams::DefaultQueryParam;
+	TraceParams.AddIgnoredActor(GetOwner());
 	return GetWorld()->LineTraceSingleByChannel(
 		OutResult,
 		StartLocation,
 		EndLocation,
-		ECollisionChannel::ECC_Visibility
+		ECollisionChannel::ECC_Visibility,
+		TraceParams
 	);
 }
 

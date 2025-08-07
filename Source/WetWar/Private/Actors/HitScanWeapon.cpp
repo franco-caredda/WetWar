@@ -3,7 +3,10 @@
 
 #include "Actors/HitScanWeapon.h"
 
+#include "Engine/DamageEvents.h"
+
 #include "GameFramework/Character.h"
+
 
 void AHitScanWeapon::Fire(const FVector& WorldLocation, const FVector& WorldDirection)
 {
@@ -26,16 +29,21 @@ void AHitScanWeapon::Fire(const FVector& WorldLocation, const FVector& WorldDire
 
 	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Blue,
 		false, 0.25f, 0, 1.5f);
+
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		HandleReduceWaterVolume();
+	}
+	
 	if (Trace(StartLocation, EndLocation, HitResult))
 	{
 		if (AActor* Actor = HitResult.GetActor())
 		{
-			Actor->ReceiveAnyDamage(Damage, nullptr,
-				Cast<ACharacter>(GetOwner())->GetController(), this);
-
+			// TODO: Add hit reaction
 			if (GetLocalRole() == ROLE_Authority)
 			{
-				HandleReduceWaterVolume();
+				Actor->TakeDamage(Damage, FPointDamageEvent{},
+				Cast<ACharacter>(GetOwner())->GetController(), this);
 			}
 		}
 	}
