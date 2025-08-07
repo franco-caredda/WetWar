@@ -58,8 +58,8 @@ void AWetWarPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this,
 		&AWetWarPlayerController::OnFireActionCompleted);
 	
-	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this,
-		&AWetWarPlayerController::OnInteractActionCompleted);
+	EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this,
+		&AWetWarPlayerController::OnInteractActionTriggered);
 }
 
 void AWetWarPlayerController::OnMoveActionTriggered(const FInputActionValue& Value)
@@ -103,6 +103,10 @@ void AWetWarPlayerController::OnFireActionCompleted(const FInputActionValue& Val
 	}
 }
 
-void AWetWarPlayerController::OnInteractActionCompleted(const FInputActionValue& Value)
+void AWetWarPlayerController::OnInteractActionTriggered(const FInputActionValue& Value)
 {
+	if (AWetWarCharacter* aCharacter = GetPawn<AWetWarCharacter>())
+	{
+		aCharacter->ServerInteract();
+	}
 }

@@ -26,6 +26,12 @@ void AWeaponBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(AWeaponBase, CurrentWaterVolume, COND_OwnerOnly);
 }
 
+void AWeaponBase::ReloadWaterVolume()
+{
+	CurrentWaterVolume = MaxWaterVolume;
+	OnWaterVolumeChanged.Broadcast(CurrentWaterVolume, MaxWaterVolume);
+}
+
 void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();

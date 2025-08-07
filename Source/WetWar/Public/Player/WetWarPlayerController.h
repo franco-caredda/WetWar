@@ -40,7 +40,7 @@ protected:
 	void OnFireActionCompleted(const FInputActionValue& Value);
 
 	UFUNCTION()
-	void OnInteractActionCompleted(const FInputActionValue& Value);
+	void OnInteractActionTriggered(const FInputActionValue& Value);
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;

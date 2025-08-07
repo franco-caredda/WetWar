@@ -6,10 +6,12 @@
 #include "GameFramework/Character.h"
 #include "WetWarCharacter.generated.h"
 
+class IInteractable;
 class AWeaponBase;
 
 class UCameraComponent;
 class UWeaponComponent;
+class USphereComponent;
 
 UENUM(BlueprintType)
 enum class ECharacterMode : uint8
@@ -33,6 +35,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StopFire();
+
+	UFUNCTION(Server, Reliable)
+	void ServerInteract();
 	
 	UFUNCTION(BlueprintPure)
 	ECharacterMode GetCharacterMode() const;
@@ -43,6 +48,14 @@ protected:
 	void OnWeaponSet(AWeaponBase* Weapon);
 
 	UFUNCTION()
+	void OnInteractionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnInteractionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
+	UFUNCTION()
 	void OnFireTick();
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -51,9 +64,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USkeletalMeshComponent> FirstPersonArms;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<USphereComponent> InteractionSphere;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UWeaponComponent> WeaponComponent;
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachments")
 	FName FirstPersonViewGripPoint;
 
@@ -61,4 +77,7 @@ protected:
 	FName SpectatorViewGripPoint;
 private:
 	FTimerHandle FireTimer;
+
+	UPROPERTY()
+	TObjectPtr<AActor> InteractActor;
 };

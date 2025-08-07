@@ -41,8 +41,12 @@ void UWeaponComponent::ServerSwapWeapons_Implementation()
 	OnWeaponSet.Broadcast(CurrentWeapon);
 }
 
-void UWeaponComponent::Reload()
+void UWeaponComponent::ServerReload_Implementation()
 {
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->ReloadWaterVolume();
+	}
 }
 
 void UWeaponComponent::Fire(const FVector& WorldLocation, const FVector& WorldDirection)

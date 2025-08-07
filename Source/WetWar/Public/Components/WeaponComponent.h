@@ -25,11 +25,11 @@ public:
 
 	void RequestCurrentWeapon();
 	
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(BlueprintCallable, Server, Reliable)
 	void ServerSwapWeapons();
 
-	UFUNCTION(BlueprintCallable)
-	void Reload();
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void ServerReload();
 	
 	UFUNCTION(BlueprintCallable)
 	void Fire(const FVector& WorldLocation, const FVector& WorldDirection);

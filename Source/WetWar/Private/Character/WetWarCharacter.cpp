@@ -4,7 +4,11 @@
 
 #include "Actors/WeaponBase.h"
 #include "Camera/CameraComponent.h"
+
+#include "Components/SphereComponent.h"
 #include "Components/WeaponComponent.h"
+
+#include "Interfaces/Interactable.h"
 
 #include "Player/WetWarPlayerController.h"
 
@@ -26,6 +30,10 @@ AWetWarCharacter::AWetWarCharacter()
 	FirstPersonArms->CastShadow = false;
 	
 	GetMesh()->SetOwnerNoSee(true);
+
+	InteractionSphere = CreateDefaultSubobject<USphereComponent>("InteractionSphere");
+	InteractionSphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	InteractionSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>("WeaponComponent");
 	if (WeaponComponent)
@@ -81,6 +89,12 @@ void AWetWarCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	WeaponComponent->OnWeaponSet.AddDynamic(this, &AWetWarCharacter::OnWeaponSet);
+
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		InteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &AWetWarCharacter::OnInteractionBeginOverlap);
+		InteractionSphere->OnComponentEndOverlap.AddDynamic(this, &AWetWarCharacter::OnInteractionEndOverlap);
+	}
 	
 	if (GetNetMode() == NM_ListenServer)
 	{
@@ -107,3 +121,27 @@ void AWetWarCharacter::OnWeaponSet(AWeaponBase* Weapon)
 	Weapon->AttachToComponent(GetMesh(),
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale, SpectatorViewGripPoint);
 }
+
+void AWetWarCharacter::OnInteractionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor->Implements<UInteractable>())
+	{
+		InteractActor = OtherActor;
+	}
+}
+
+void AWetWarCharacter::OnInteractionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	InteractActor = nullptr;
+}
+
+void AWetWarCharacter::ServerInteract_Implementation()
+{
+	if (InteractActor)
+	{
+		IInteractable::Execute_Interact(InteractActor, this);
+	}
+}
+

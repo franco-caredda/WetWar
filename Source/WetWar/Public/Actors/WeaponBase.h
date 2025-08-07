@@ -22,6 +22,8 @@ public:
 	
 	virtual void Fire(const FVector& WorldLocation, const FVector& WorldDirection) PURE_VIRTUAL(AWeaponBase::Fire);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	void ReloadWaterVolume();
 
 	FORCEINLINE bool CanFire() const { return CurrentWaterVolume > 0; }
 	FORCEINLINE FVector GetMuzzleLocation() const { return MuzzleLocation->GetComponentLocation(); }
