@@ -51,13 +51,7 @@ void UWeaponComponent::ServerReload_Implementation()
 
 void UWeaponComponent::Fire(const FVector& WorldLocation, const FVector& WorldDirection)
 {
-	if (Cast<AHitScanWeapon>(CurrentWeapon) != nullptr &&
-		GetOwnerRole() != ROLE_Authority)
-	{
-		PerformFire(WorldLocation, WorldDirection);
-	}
-
-	ServerPerformFire(WorldLocation, WorldDirection);
+	CurrentWeapon->Fire(WorldLocation, WorldDirection);
 }
 
 float UWeaponComponent::GetFireRate() const
@@ -68,16 +62,6 @@ float UWeaponComponent::GetFireRate() const
 	}
 
 	return 0.0f;
-}
-
-void UWeaponComponent::PerformFire(const FVector& WorldLocation, const FVector& WorldDirection) const
-{
-	CurrentWeapon->Fire(WorldLocation, WorldDirection);
-}
-
-void UWeaponComponent::ServerPerformFire_Implementation(const FVector& WorldLocation, const FVector& WorldDirection)
-{
-	PerformFire(WorldLocation, WorldDirection);
 }
 
 void UWeaponComponent::BeginPlay()

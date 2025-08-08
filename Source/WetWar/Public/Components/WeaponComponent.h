@@ -38,11 +38,6 @@ public:
 	float GetFireRate() const;
 protected:
 	virtual void BeginPlay() override;
-
-	void PerformFire(const FVector& WorldLocation, const FVector& WorldDirection) const;
-
-	UFUNCTION(Server, Reliable)
-	void ServerPerformFire(const FVector& WorldLocation, const FVector& WorldDirection);
 private:
 	UFUNCTION()
 	void OnRep_CurrentWeapon() const;

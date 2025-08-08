@@ -3,9 +3,15 @@
 
 #include "Actors/HitScanWeapon.h"
 
+#include "Components/ServerSideRewindComponent.h"
+
 #include "Engine/DamageEvents.h"
 
 #include "GameFramework/Character.h"
+#include "GameFramework/GameStateBase.h"
+
+#include "Interfaces/ServerSideRewindComponentInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 
 void AHitScanWeapon::Fire(const FVector& WorldLocation, const FVector& WorldDirection)
@@ -34,17 +40,33 @@ void AHitScanWeapon::Fire(const FVector& WorldLocation, const FVector& WorldDire
 	{
 		HandleReduceWaterVolume();
 	}
-	
+
+	AGameStateBase* GameState = UGameplayStatics::GetGameState(this);
 	if (Trace(StartLocation, EndLocation, HitResult))
 	{
 		if (AActor* Actor = HitResult.GetActor())
 		{
 			// TODO: Add hit reaction
-			if (GetLocalRole() == ROLE_Authority)
-			{
-				Actor->TakeDamage(Damage, FPointDamageEvent{},
-				Cast<ACharacter>(GetOwner())->GetController(), this);
-			}
+			ServerFire(GameState->GetServerWorldTimeSeconds(), Actor, WorldLocation, WorldDirection, GetDistance());
 		}
 	}
 }
+
+void AHitScanWeapon::ServerFire_Implementation(float Time, AActor* Actor, const FVector& StartLocation,
+	const FVector& WorldDirection, float TraceLength)
+{
+	if (IServerSideRewindComponentInterface* ServerSideRewind =
+					Cast<IServerSideRewindComponentInterface>(GetOwner()))
+	{
+		UServerSideRewindComponent* RewindComponent =
+			ServerSideRewind->GetServerSideRewindComponent();
+
+		if (RewindComponent->HandleDetectHit(Time,
+			Actor, StartLocation, WorldDirection, TraceLength))
+		{
+			Actor->TakeDamage(Damage, FPointDamageEvent{},
+		Cast<ACharacter>(GetOwner())->GetController(), this);
+		}
+	}
+}
+

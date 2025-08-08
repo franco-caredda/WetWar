@@ -4,6 +4,7 @@
 
 #include "Actors/WeaponBase.h"
 #include "Camera/CameraComponent.h"
+#include "Components/ServerSideRewindComponent.h"
 
 #include "Components/SphereComponent.h"
 #include "Components/WeaponComponent.h"
@@ -47,6 +48,8 @@ AWetWarCharacter::AWetWarCharacter()
 	{
 		WetnessComponent->SetIsReplicated(true);
 	}
+
+	ServerSideRewindComponent = CreateDefaultSubobject<UServerSideRewindComponent>("ServerSideRewindComponent");
 }
 
 float AWetWarCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator,
@@ -54,6 +57,16 @@ float AWetWarCharacter::TakeDamage(float Damage, struct FDamageEvent const& Dama
 {
 	WetnessComponent->TakeDamage(Damage);
 	return Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+}
+
+UServerSideRewindComponent* AWetWarCharacter::GetServerSideRewindComponent() const
+{
+	return ServerSideRewindComponent;
+}
+
+UCapsuleComponent* AWetWarCharacter::GetCollisionCapsuleComponent() const
+{
+	return GetCapsuleComponent();
 }
 
 void AWetWarCharacter::StartFire()

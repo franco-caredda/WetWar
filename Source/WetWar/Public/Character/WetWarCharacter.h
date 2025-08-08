@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/ServerSideRewindComponentInterface.h"
 #include "WetWarCharacter.generated.h"
 
 class UWetnessComponent;
@@ -13,6 +14,7 @@ class AWeaponBase;
 class UCameraComponent;
 class UWeaponComponent;
 class USphereComponent;
+class UServerSideRewindComponent;
 
 UENUM(BlueprintType)
 enum class ECharacterMode : uint8
@@ -24,7 +26,7 @@ enum class ECharacterMode : uint8
 };
 
 UCLASS()
-class WETWAR_API AWetWarCharacter : public ACharacter
+class WETWAR_API AWetWarCharacter : public ACharacter, public IServerSideRewindComponentInterface
 {
 	GENERATED_BODY()
 
@@ -33,6 +35,9 @@ public:
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator, AActor* DamageCauser) override;
+
+	virtual UServerSideRewindComponent* GetServerSideRewindComponent() const override;
+	virtual UCapsuleComponent* GetCollisionCapsuleComponent() const override;
 	
 	UFUNCTION(BlueprintCallable)
 	void StartFire();
@@ -79,6 +84,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UWetnessComponent> WetnessComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UServerSideRewindComponent> ServerSideRewindComponent;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attachments")
 	FName FirstPersonViewGripPoint;

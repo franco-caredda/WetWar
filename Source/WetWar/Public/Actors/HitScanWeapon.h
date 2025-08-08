@@ -19,6 +19,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	FORCEINLINE float GetDistance() const { return Distance; }
 protected:
+	UFUNCTION(Server, Reliable)
+	void ServerFire(float Time, AActor* Actor, const FVector& StartLocation, const FVector& WorldDirection, float TraceLength);
+protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	float Distance;
 };
